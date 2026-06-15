@@ -1,16 +1,21 @@
-# Project title
+# Urban Influences on the Sea Breeze: Implications for Energy Supply in Sydney
 
 **Research area:**
+Using the ACCESS-rAM urban runs, identify sea breezes by temperatures, wind speeds and humidity.
 
-**Research questios:**
+**Research questions:**
+* How do urban landscapes affect the sea breeze and/or wind capacity generation?
+* Where in the Sydney region would wind generation assets best be placed?
 
 **Project Leads**
-* name, affiliation/github username
-* 
+* Mat Lipson, UNSW
 
 **Project members:**
-* name, affiliation/github username
-* 
+* Hamim Zaky Hadibasyir, UNSW
+* M. Reyhan Respati, Monash
+* Chang Xu, UNSW
+* Mahsa Zarrabi, UNSW
+* Danny Shadrech, Monash
 
 
 This project is structured as following:
