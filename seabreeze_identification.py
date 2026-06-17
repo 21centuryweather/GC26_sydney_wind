@@ -198,7 +198,10 @@ def load_variable(vname, t1, t2, exp_season, exp_res, exp_id, lon_slice,
             raise ValueError("Invalid stagger dim")
     
     #Load the data from disk. If hgt_slice is not None, then we are loading 3D data
-    fnames = f"/g/data/gb02/mjl561/um2nc/{exp_season}/{exp_res}/{exp_id}/{vname}-SY_{exp_res}_{exp_id}-v1-201611300100-201703010000.nc"
+    if exp_season=='SY_djf':
+        fnames = f"/g/data/gb02/mjl561/um2nc/{exp_season}/{exp_res}/{exp_id}/{vname}-SY_{exp_res}_{exp_id}-v1-201611300100-201703010000.nc"
+    else:
+        fnames = f"/g/data/gb02/mjl561/um2nc/{exp_season}/{exp_res}/{exp_id}/{vname}-SY_{exp_res}_{exp_id}-v1-201705310100-201709010000.nc"
     if hgt_slice is None:
         da = xr.open_dataset(
             fnames,
@@ -317,14 +320,19 @@ def load_variable(vname, t1, t2, exp_season, exp_res, exp_id, lon_slice,
         chunks["lev"] = -1
         #da = da.chunk({"lev":-1}).interp(lev=np.arange(hgt_slice.start,hgt_slice.stop+dh,dh),method="linear",kwargs={"fill_value":"extrapolate"})
         #Created in aus2200_hybrid_height_calc()
-        ds_geop = xr.open_dataset(f"/g/data/gb02/mjl561/um2nc/{exp_season}/{exp_res}/{exp_id}/geop_ht_rho-SY_{exp_res}_{exp_id}-v1-201611300100-201703010000.nc")
+        if exp_season=='SY_djf':
+            ds_geop = xr.open_dataset(f"/g/data/gb02/mjl561/um2nc/{exp_season}/{exp_res}/{exp_id}/geop_ht_rho-SY_{exp_res}_{exp_id}-v1-201611300100-201703010000.nc")
+            ds_topog = xr.open_dataset(f"/g/data/gb02/mjl561/um2nc/{exp_season}/{exp_res}/{exp_id}/topog-SY_{exp_res}_{exp_id}-v1.nc")
+        else:
+            ds_geop = xr.open_dataset(f"/g/data/gb02/mjl561/um2nc/{exp_season}/{exp_res}/{exp_id}/geop_ht_rho-SY_{exp_res}_{exp_id}-v1-201705310100-201709010000.nc")
+            ds_topog = xr.open_dataset(f"/g/data/gb02/mjl561/um2nc/{exp_season}/{exp_res}/{exp_id}/topog-SY_{exp_res}_{exp_id}-v1.nc")
+            
         ds_geop = ds_geop.rename({
             "latitude": "lat",
             "longitude": "lon",
             "model_level_number": "lev"
         })
         
-        ds_topog = xr.open_dataset(f"/g/data/gb02/mjl561/um2nc/{exp_season}/{exp_res}/{exp_id}/topog-SY_{exp_res}_{exp_id}-v1.nc")
         ds_topog = ds_topog.rename({
             "latitude": "lat",
             "longitude": "lon"
@@ -365,7 +373,7 @@ hgt_slice = slice(0,4500)
 
 # Optional
 # exp_season = 'SY_djf' # 'SY_djf' or 'SY_jja'
-# exp_res = 'SY_11p1' # 'SY_1', 'SY_5', or 'SY_11p1'
+# exp_res = 'SY_5' # 'SY_1', 'SY_5', or 'SY_11p1'
 # exp_id = 'NO-URBAN' # 'CTRL' or 'NO-URBAN'
 
 exp_season = sys.argv[1]
@@ -529,6 +537,7 @@ tas = load_variable(
 
 #Sea breeze index
 wind = xr.Dataset({"u":ua,"v":va})
+
 sbi = sea_breeze_funcs.calc_sbi(wind,
                                 angle_ds.angle_interp,
                                 subtract_mean=False,
