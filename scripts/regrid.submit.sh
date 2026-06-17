@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#PBS -l ncpus=1
+#PBS -l mem=190GB
+#PBS -l jobfs=1GB
+#PBS -q normal
+#PBS -P nf33
+#PBS -l walltime=02:00:00
+#PBS -l storage=gdata/xp65+gdata/gb02+scratch/gb02
+#PBS -o /home/565/mr4682/GC26_sydney_wind/scripts/regrid_wnd_ucmp-SY_SY_11p1_CTRL-v1-201611300100-201703010000.out
+#PBS -e /home/565/mr4682/GC26_sydney_wind/scripts/regrid_wnd_ucmp-SY_SY_11p1_CTRL-v1-201611300100-201703010000.err
+
+cd /home/565/mr4682/GC26_sydney_wind
+
+module purge
+module use /g/data/xp65/public/modules
+module load conda/analysis3
+
+python3 /home/565/mr4682/GC26_sydney_wind/scripts/regrid.py

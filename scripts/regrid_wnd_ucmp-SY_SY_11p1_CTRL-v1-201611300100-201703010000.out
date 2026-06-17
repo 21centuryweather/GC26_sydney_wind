@@ -1,0 +1,26 @@
+<xarray.Dataset> Size: 98MB
+Dimensions:                  (time: 24, model_level_number: 8, latitude: 320,
+                              longitude: 400)
+Coordinates:
+  * time                     (time) datetime64[ns] 192B 2016-12-01 ... 2016-1...
+    forecast_period          (time) timedelta64[ns] 192B ...
+  * model_level_number       (model_level_number) int64 64B 1 2 3 4 5 6 7 8
+    level_height             (model_level_number) float64 64B ...
+    sigma                    (model_level_number) float64 64B ...
+  * latitude                 (latitude) float64 3kB -51.48 -51.37 ... -16.39
+  * longitude                (longitude) float64 3kB 129.2 129.3 ... 173.0 173.1
+    forecast_reference_time  datetime64[ns] 8B ...
+Data variables:
+    wnd_ucmp                 (time, model_level_number, latitude, longitude) float32 98MB ...
+
+======================================================================================
+                  Resource Usage on 2026-06-17 11:03:59:
+   Job Id:             171414794.gadi-pbs
+   Project:            nf33
+   Exit Status:        0
+   Service Units:      1.19
+   NCPUs Requested:    1                   CPU Time Used: 00:00:20        
+   Memory Requested:   190.0GB               Memory Used: 2.51GB          
+   Walltime Requested: 02:00:00            Walltime Used: 00:00:45        
+   JobFS Requested:    1.0GB                  JobFS Used: 0B              
+======================================================================================
