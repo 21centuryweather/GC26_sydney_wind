@@ -252,6 +252,16 @@ def load_variable(vname, t1, t2, exp_season, exp_res, exp_id, lon_slice,
             +
             da.isel(lat=slice(1, None)).assign_coords(lat=new_lat)
         ) / 2
+
+        # Chang add
+        target_lat = lsm.lat.values
+        target_lon = lsm.lon.values
+        
+        da = da.interp(
+            lat=target_lat,
+            lon=target_lon,
+            method="linear"
+        )
     
     if staggered == "lon":
         new_lon = 0.5 * (da.lon.values[:-1] + da.lon.values[1:])
@@ -261,6 +271,17 @@ def load_variable(vname, t1, t2, exp_season, exp_res, exp_id, lon_slice,
             +
             da.isel(lon=slice(1, None)).assign_coords(lon=new_lon)
         ) / 2
+
+        # Chang add
+        target_lat = lsm.lat.values
+        target_lon = lsm.lon.values
+        
+        da = da.interp(
+            lat=target_lat,
+            lon=target_lon,
+            method="linear"
+        )
+        
     if staggered == "time":
         da = (da.isel(time=slice(0,-1)).assign_coords({"time":unstaggered_times}) +\
                     da.isel(time=slice(1,da.time.shape[0])).assign_coords({"time":unstaggered_times})) / 2
@@ -320,16 +341,6 @@ def load_variable(vname, t1, t2, exp_season, exp_res, exp_id, lon_slice,
     da = da.assign_attrs({"smoothed":smooth})
     if smooth:
         da = da.assign_attrs({"gaussian_smoothing_sigma":sigma})
-
-    # Chang add
-    target_lat = lsm.lat.values
-    target_lon = lsm.lon.values
-    
-    da = da.interp(
-        lat=target_lat,
-        lon=target_lon,
-        method="linear"
-    )
     
     return da
 
