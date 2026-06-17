@@ -342,12 +342,17 @@ stats_output_path = "/g/data/up6/cx5009/hackathon/energy2026/Data_identified_sea
 
 #Time bounds for a single case (using 8 hours of data)
 t1 = "2016-11-30 01:00"
-t2 = "2017-03-01 00:00" # the last time step "2017-03-01 00:00"
+t2 = "2016-12-02 00:00" # the last time step "2017-03-01 00:00"
       
 #Lat lon and height bounds (Sydney, Australia). Height bounds chosen approximately as the typical maximum extent of the PBL
 lat_slice = slice(-35.5,-32.269001)
 lon_slice = slice(149.1505,153.1915)
 hgt_slice = slice(0,4500)
+
+# Optional
+# exp_season = 'SY_djf' # 'SY_djf' or 'SY_jja'
+# exp_res = 'SY_11p1' # 'SY_1', 'SY_5', or 'SY_11p1'
+# exp_id = 'NO-URBAN' # 'CTRL' or 'NO-URBAN'
 
 exp_season = sys.argv[1]
 exp_res    = sys.argv[2]
@@ -361,11 +366,6 @@ elif exp_res=="SY_5":
     dx_res = 0.045
 else:
     dx_res = 0.00899
-
-# Optional
-# exp_season = 'SY_djf' # 'SY_djf' or 'SY_jja'
-# exp_res = 'SY_11p1' # 'SY_1', 'SY_5', or 'SY_11p1'
-# exp_id = 'NO-URBAN' # 'CTRL' or 'NO-URBAN'
 
 print("=================== Coastline Angel Calculation ===================", flush=True)
 #Load land sea mask
