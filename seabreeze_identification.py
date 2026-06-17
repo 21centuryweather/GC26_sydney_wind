@@ -2,6 +2,7 @@
 Seabreeze Identification Script
 
 This project uses two existing ACCESS-rAM high-resolution atmospheric model simulations over the Sydney region, run for two sets of three summer months (a summer and winter period), both with and without an urban representation. (data path: /g/data/gb02/mjl561/um2nc)
+    - More detail. https://unsw-my.sharepoint.com/:w:/r/personal/z9901702_ad_unsw_edu_au/_layouts/15/Doc.aspx?sourcedoc=%7B760ec270-7524-43da-a870-02b02a74c8d5%7D&action=view&wdPid=572313e2
 
 Based on the Python package "sea_breeze v1.1" from Andrew Brown
     - Method description: https://gmd.copernicus.org/articles/19/933/2026/
@@ -341,16 +342,30 @@ stats_output_path = "/g/data/up6/cx5009/hackathon/energy2026/Data_identified_sea
 
 #Time bounds for a single case (using 8 hours of data)
 t1 = "2016-11-30 01:00"
-t2 = "2017-03-01 00:00"
+t2 = "2017-03-01 00:00" # the last time step "2017-03-01 00:00"
       
 #Lat lon and height bounds (Sydney, Australia). Height bounds chosen approximately as the typical maximum extent of the PBL
 lat_slice = slice(-35.5,-32.269001)
 lon_slice = slice(149.1505,153.1915)
 hgt_slice = slice(0,4500)
 
-exp_season = 'SY_djf' # 'SY_djf' or 'SY_jja'
-exp_res = 'SY_11p1' # 'SY_1', 'SY_5', or 'SY_11p1'
-exp_id = 'NO-URBAN' # 'CTRL' or 'NO-URBAN'
+exp_season = sys.argv[1]
+exp_res    = sys.argv[2]
+exp_id     = sys.argv[3]
+
+print(exp_season, exp_res, exp_id, flush=True)
+
+if exp_res=="SY_11p1":
+    dx_res = 0.11
+elif exp_res=="SY_5":
+    dx_res = 0.045
+else:
+    dx_res = 0.00899
+
+# Optional
+# exp_season = 'SY_djf' # 'SY_djf' or 'SY_jja'
+# exp_res = 'SY_11p1' # 'SY_1', 'SY_5', or 'SY_11p1'
+# exp_id = 'NO-URBAN' # 'CTRL' or 'NO-URBAN'
 
 print("=================== Coastline Angel Calculation ===================", flush=True)
 #Load land sea mask
@@ -387,7 +402,7 @@ va = load_variable(
     "1hr",
     chunks=chunks,
     staggered="lat",
-    dx=0.11,
+    dx=dx_res,
     smooth=smooth,
     sigma=sigma,
     hgt_slice=hgt_slice,
@@ -406,7 +421,7 @@ ua = load_variable(
     "1hr",
     chunks=chunks,
     staggered="lon",
-    dx=0.11, # for 11p1
+    dx=dx_res, 
     smooth=smooth,
     sigma=sigma,
     hgt_slice=hgt_slice,
@@ -444,6 +459,7 @@ vas = load_variable(
     "1hr",
     chunks=chunks,
     staggered="lat",
+    dx=dx_res,
     smooth=smooth,
     sigma=sigma)
 
@@ -460,6 +476,7 @@ uas = load_variable(
     "1hr",
     chunks=chunks,
     staggered="lon",
+    dx=dx_res,
     smooth=smooth,
     sigma=sigma)
 
