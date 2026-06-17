@@ -91,7 +91,7 @@ stats_output_path = "/g/data/up6/cx5009/hackathon/energy2026/"
 lat_slice = slice(-35.5,-32.269001)
 lon_slice = slice(149.1505,153.1915)
 
-exp_res = 'SY_11p1' # 'SY_1', 'SY_5', or 'SY_11p1'
+exp_res = 'SY_5' # 'SY_1', 'SY_5', or 'SY_11p1'
 
 print("=================== Coastline Angel Calculation ===================", flush=True)
 #Load land sea mask
@@ -105,7 +105,7 @@ angle_ds = load_model_data.get_coastline_angle_kernel(
     compute=True,
     smooth=False)
 
-angle_ds.to_netcdf(f'/g/data/up6/cx5009/hackathon/energy2026/cost_angle_{exp_res}.nc')
+angle_ds.to_netcdf(f'/g/data/up6/cx5009/hackathon/energy2026/coast_angle_{exp_res}.nc')
 
 
 
