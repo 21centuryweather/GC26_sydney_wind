@@ -36,7 +36,6 @@ sea_breeze_filters
 # =====================================================================
 # Functions
 # =====================================================================
-
 def load_static(exp_season,exp_res,exp_id,lon_slice,lat_slice,chunks="auto"):
 
     """
@@ -378,17 +377,15 @@ elif exp_res=="SY_5":
 else:
     dx_res = 0.00899
 
-print("=================== Coastline Angel Calculation ===================", flush=True)
-#Load land sea mask
-orog, lsm = load_static(exp_season,exp_res,exp_id,lon_slice,lat_slice)
+if exp_season == 'SY_djf':
+    change_tlocal = 11
+else:
+    change_tlocal = 10
 
-#Compute coastline angles
-angle_ds = load_model_data.get_coastline_angle_kernel(
-    lsm,
-    R=4,
-    latlon_chunk_size=8,
-    compute=True,
-    smooth=False)
+print("=================== Loading Coastline Angel ===================", flush=True)
+#Load Coastline Angel data
+orog, lsm = load_static(exp_season, exp_res, exp_id,lon_slice,lat_slice)
+angle_ds = xr.open_dataset(f'/g/data/up6/cx5009/hackathon/energy2026/cost_angle_{exp_res}.nc')
 
 print("=================== Seabreeze Diagnostics Calculation ===================", flush=True)
 #Set chunks for loading data
@@ -557,6 +554,11 @@ F_fuzzy = field = sea_breeze_funcs.fuzzy_function_combine(
     hourly_change.wind_change,
     hourly_change.q_change,
     hourly_change.t_change, combine_method="mean")
+
+# Time change to local time
+sbi["time"] = sbi.time + np.timedelta64(change_tlocal, "h")
+F["time"] = F.time + np.timedelta64(change_tlocal, "h")
+F_fuzzy["time"] = F_fuzzy.time + np.timedelta64(change_tlocal, "h")
 
 print("=================== Object Filter ===================", flush=True)
 #Set up filtering options. Here just use the orientation, aspect ratio and area filters
