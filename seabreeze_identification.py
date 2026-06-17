@@ -20,12 +20,10 @@ if not hasattr(np, "in1d"):
     
 import xarray as xr
 import pandas as pd
-from dask.distributed import Client
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 
 sys.path.append('/home/561/cx5009/app/') # need change
-client = Client()
 
 from sea_breeze import (
 load_model_data,
@@ -307,7 +305,13 @@ def load_variable(vname, t1, t2, exp_season, exp_res, exp_id, lon_slice,
             [c for c in drop_coords if c in da.coords],
             errors="ignore"
         )
-
+        
+        da = da.map_blocks(
+            load_model_data.gaussian_filter_time_slice,
+            kwargs={"sigma":sigma,"axes":smooth_axes},
+            template=da
+        )
+        
     #Interpolate to regular height levels
     if interp_hgts:
         chunks["lev"] = -1
@@ -352,7 +356,7 @@ stats_output_path = "/g/data/up6/cx5009/hackathon/energy2026/Data_identified_sea
 
 #Time bounds for a single case (using 8 hours of data)
 t1 = "2016-11-30 01:00"
-t2 = "2016-12-02 00:00" # the last time step "2017-03-01 00:00" # need change
+t2 = "2017-03-01 00:00" # the last time step "2017-03-01 00:00" # need change
       
 #Lat lon and height bounds (Sydney, Australia). Height bounds chosen approximately as the typical maximum extent of the PBL
 lat_slice = slice(-35.5,-32.269001)
@@ -402,9 +406,9 @@ va = load_variable(
     "wnd_vcmp",
     t1,
     t2,
-    'SY_djf',
-    'SY_11p1',
-    'CTRL',
+    exp_season,
+    exp_res,
+    exp_id,
     lon_slice,
     lat_slice,
     "1hr",
@@ -421,9 +425,9 @@ ua = load_variable(
     "wnd_ucmp",
     t1,
     t2,
-    'SY_djf',
-    'SY_11p1',
-    'CTRL',
+    exp_season,
+    exp_res,
+    exp_id,
     lon_slice,
     lat_slice,
     "1hr",
@@ -440,9 +444,9 @@ zmla = load_variable(
     "abl_ht",
     t1,
     t2,
-    'SY_djf',
-    'SY_11p1',
-    'CTRL',
+    exp_season,
+    exp_res,
+    exp_id,
     lon_slice,
     lat_slice,
     "1hr",
@@ -459,9 +463,9 @@ vas = load_variable(
     "vwnd10m_b",
     t1,
     t2,
-    'SY_djf',
-    'SY_11p1',
-    'CTRL',
+    exp_season,
+    exp_res,
+    exp_id,
     lon_slice,
     lat_slice,
     "1hr",
@@ -476,9 +480,9 @@ uas = load_variable(
     "uwnd10m_b",
     t1,
     t2,
-    'SY_djf',
-    'SY_11p1',
-    'CTRL',
+    exp_season,
+    exp_res,
+    exp_id,
     lon_slice,
     lat_slice,
     "1hr",
@@ -493,9 +497,9 @@ hus = load_variable(
     "qsair_scrn",
     t1,
     t2,
-    'SY_djf',
-    'SY_11p1',
-    'CTRL',
+    exp_season,
+    exp_res,
+    exp_id,
     lon_slice,
     lat_slice,
     "1hr",
@@ -513,9 +517,9 @@ tas = load_variable(
     "temp_scrn",
     t1,
     t2,
-    'SY_djf',
-    'SY_11p1',
-    'CTRL',
+    exp_season,
+    exp_res,
+    exp_id,
     lon_slice,
     lat_slice,
     "1hr",
