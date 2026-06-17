@@ -385,7 +385,7 @@ else:
 print("=================== Loading Coastline Angel ===================", flush=True)
 #Load Coastline Angel data
 orog, lsm = load_static(exp_season, exp_res, exp_id,lon_slice,lat_slice)
-angle_ds = xr.open_dataset(f'/g/data/up6/cx5009/hackathon/energy2026/cost_angle_{exp_res}.nc')
+angle_ds = xr.open_dataset(f'/g/data/up6/cx5009/hackathon/energy2026/coast_angle_{exp_res}.nc')
 
 print("=================== Seabreeze Diagnostics Calculation ===================", flush=True)
 #Set chunks for loading data
