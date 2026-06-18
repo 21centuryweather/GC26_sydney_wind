@@ -22,6 +22,7 @@ import xarray as xr
 import pandas as pd
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
+from pathlib import Path
 
 sys.path.append('/home/561/cx5009/app/') # need change
 
@@ -395,6 +396,17 @@ else:
     t1 = "2017-05-31 01:00"
     t2 = "2017-09-01 00:00" # the last time step "2017-09-01 00:00" # need change
 
+outdir = Path(
+    f"/g/data/up6/cx5009/hackathon/energy2026/Data_identified_seabreeze/{exp_season}_{exp_res}_{exp_id}"
+)
+
+outdir.mkdir(parents=True, exist_ok=True)
+
+print("=================== Loading Coastline Angel ===================", flush=True)
+#Load Coastline Angel data
+orog, lsm = load_static(exp_season, exp_res, exp_id,lon_slice,lat_slice)
+angle_ds = xr.open_dataset(f'/g/data/up6/cx5009/hackathon/energy2026/coast_angle_{exp_res}.nc') # need change
+
 print("=================== Seabreeze Diagnostics Calculation ===================", flush=True)
 #Set chunks for loading data
 #Note because of our strategy applying xr.DataArray.map_blocks for smoothing, we need to 
@@ -494,7 +506,7 @@ F_objects = sea_breeze_filters.filter_3d(
     lsm=lsm,
     angle_ds=angle_ds,
     save_mask=True,
-    filter_out_path='/g/data/up6/cx5009/hackathon/energy2026/Data_identified_seabreeze',
+    filter_out_path=outdir,
     skipna=False,
     props_df_out_path=stats_output_path + f"F_{exp_season}_{exp_res}_{exp_id}.csv",
     **kwargs).compute()
