@@ -361,17 +361,7 @@ def load_variable(vname, t1, t2, exp_season, exp_res, exp_id, lon_slice,
 print("Identification Starting ......", flush=True)
 print("=================== Setting params ===================", flush=True)
 stats_output_path = "/g/data/up6/cx5009/hackathon/energy2026/Data_identified_seabreeze/" # need change
-
-if exp_season == 'SY_djf':
-    change_tlocal = 11
-    #Time bounds for a single case (using 8 hours of data)
-    t1 = "2016-11-30 01:00"
-    t2 = "2017-03-01 00:00" # the last time step "2017-03-01 00:00" # need change
-else:
-    change_tlocal = 10
-    t1 = "2017-05-31 01:00"
-    t2 = "2017-09-01 00:00" # the last time step "2017-09-01 00:00" # need change
-      
+   
 #Lat lon and height bounds (Sydney, Australia). Height bounds chosen approximately as the typical maximum extent of the PBL
 lat_slice = slice(-35.5,-32.269001)
 lon_slice = slice(149.1505,153.1915)
@@ -394,6 +384,16 @@ elif exp_res=="SY_5":
     dx_res = 0.045
 else:
     dx_res = 0.00899
+
+if exp_season == 'SY_djf':
+    change_tlocal = 11
+    #Time bounds for a single case (using 8 hours of data)
+    t1 = "2016-11-30 01:00"
+    t2 = "2017-03-01 00:00" # the last time step "2017-03-01 00:00" # need change
+else:
+    change_tlocal = 10
+    t1 = "2017-05-31 01:00"
+    t2 = "2017-09-01 00:00" # the last time step "2017-09-01 00:00" # need change
 
 print("=================== Seabreeze Diagnostics Calculation ===================", flush=True)
 #Set chunks for loading data
