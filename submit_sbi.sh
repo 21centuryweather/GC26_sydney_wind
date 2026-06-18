@@ -1,25 +1,25 @@
 #!/bin/bash
 #PBS -q normal
-#PBS -P k10
-#PBS -l ncpus=24
-#PBS -l mem=96GB
+#PBS -P nf33
+#PBS -l ncpus=1
+#PBS -l mem=100GB
 #PBS -l jobfs=1GB
 #PBS -l walltime=08:00:00
-#PBS -l storage=scratch/k10+gdata/k10+gdata/xp65+gdata/nf33+gdata/gb02
+#PBS -l storage=scratch/up6+gdata/up6+gdata/xp65+gdata/nf33+gdata/gb02
 #PBS -l wd
-#PBS -o /g/data/k10/ds1182/seabreeze_work/PBS_output/
-#PBS -e /g/data/k10/ds1182/seabreeze_work/PBS_output/
-#PBS -M danny.shadrech@monash.edu
+#PBS -o /scratch/up6/cx5009/PBS_output/
+#PBS -e /scratch/up6/cx5009/PBS_output/
+#PBS -M chang.xu8@unsw.edu.au
 #PBS -m abe
 
 
-cd /g/data/k10/ds1182/GC26_sydney_wind
+cd /g/data/up6/cx5009/hackathon/energy2026
 
 module purge
 module use /g/data/xp65/public/modules
 module load conda/analysis3
 
-python3 /g/data/k10/ds1182/seabreeze_work/seabreeze_identification.py \
+python3 seabreeze_identification.py \
     ${EXP_SEASON} \
     ${EXP_RES} \
     ${EXP_ID}
