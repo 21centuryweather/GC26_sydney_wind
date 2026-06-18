@@ -32,6 +32,8 @@ sea_breeze_funcs,
 sea_breeze_filters
 )
 
+from dask.distributed import Client
+
 # =====================================================================
 # Functions
 # =====================================================================
@@ -356,166 +358,168 @@ def load_variable(vname, t1, t2, exp_season, exp_res, exp_id, lon_slice,
     
     return da
 
-# =====================================================================
-# Main
-# =====================================================================
-print("Identification Starting ......", flush=True)
-print("=================== Setting params ===================", flush=True)
-stats_output_path = "/g/data/up6/cx5009/hackathon/energy2026/Data_identified_seabreeze/" # need change
-   
-#Lat lon and height bounds (Sydney, Australia). Height bounds chosen approximately as the typical maximum extent of the PBL
-lat_slice = slice(-35.5,-32.269001)
-lon_slice = slice(149.1505,153.1915)
-hgt_slice = slice(0,4500)
-
-# Optional
-# exp_season = 'SY_djf' # 'SY_djf' or 'SY_jja'
-# exp_res = 'SY_5' # 'SY_1', 'SY_5', or 'SY_11p1'
-# exp_id = 'NO-URBAN' # 'CTRL' or 'NO-URBAN'
-
-exp_season = sys.argv[1]
-exp_res    = sys.argv[2]
-exp_id     = sys.argv[3]
-
-print(exp_season, exp_res, exp_id, flush=True)
-
-if exp_res=="SY_11p1":
-    dx_res = 0.11
-elif exp_res=="SY_5":
-    dx_res = 0.045
-else:
-    dx_res = 0.00899
-
-if exp_season == 'SY_djf':
-    change_tlocal = 11
-    #Time bounds for a single case (using 8 hours of data)
-    t1 = "2016-11-30 01:00"
-    t2 = "2017-03-01 00:00" # the last time step "2017-03-01 00:00" # need change
-else:
-    change_tlocal = 10
-    t1 = "2017-05-31 01:00"
-    t2 = "2017-09-01 00:00" # the last time step "2017-09-01 00:00" # need change
-
-outdir = Path(
-    f"/g/data/up6/cx5009/hackathon/energy2026/Data_identified_seabreeze/{exp_season}_{exp_res}_{exp_id}"
-)
-
-outdir.mkdir(parents=True, exist_ok=True)
-
-print("=================== Loading Coastline Angel ===================", flush=True)
-#Load Coastline Angel data
-orog, lsm = load_static(exp_season, exp_res, exp_id,lon_slice,lat_slice)
-angle_ds = xr.open_dataset(f'/g/data/up6/cx5009/hackathon/energy2026/coast_angle_{exp_res}.nc') # need change
-
-print("=================== Seabreeze Diagnostics Calculation ===================", flush=True)
-#Set chunks for loading data
-#Note because of our strategy applying xr.DataArray.map_blocks for smoothing, we need to 
-# have time chunks of size 1.
-chunks = {"lev":{},"time":1,"lat":-1,"lon":-1}
-
-#Set smoothing option to True (gaussian smoothing filter with a sigma of 4. See scipy.ndimage.gaussian_filter)
-smooth = True
-sigma = 4
-
-#Load surface V wind
-vas = load_variable(
-    "vwnd10m_b",
-    t1,
-    t2,
-    exp_season,
-    exp_res,
-    exp_id,
-    lon_slice,
-    lat_slice,
-    "1hr",
-    chunks=chunks,
-    staggered="lat",
-    dx=dx_res,
-    smooth=smooth,
-    sigma=sigma)
-
-#Load surface U wind
-uas = load_variable(
-    "uwnd10m_b",
-    t1,
-    t2,
-    exp_season,
-    exp_res,
-    exp_id,
-    lon_slice,
-    lat_slice,
-    "1hr",
-    chunks=chunks,
-    staggered="lon",
-    dx=dx_res,
-    smooth=smooth,
-    sigma=sigma)
-
-#Load surface specific humidity
-hus = load_variable(
-    "qsair_scrn",
-    t1,
-    t2,
-    exp_season,
-    exp_res,
-    exp_id,
-    lon_slice,
-    lat_slice,
-    "1hr",
-    chunks=chunks,
-    smooth=smooth,
-    sigma=sigma)
-
-#Moisture frontogenesis
-F = sea_breeze_funcs.kinematic_frontogenesis(
-    hus,
-    uas,
-    vas
-)
-
-# Time change to local time
-F["time"] = F.time + np.timedelta64(change_tlocal, "h")
-
-print("=================== Object Filter ===================", flush=True)
-#Set up filtering options. Here just use the orientation, aspect ratio and area filters
-kwargs = {
-    "orientation_filter":True,
-    "aspect_filter":True,
-    "area_filter":True,        
-    "land_sea_temperature_filter":False,                    
-    "temperature_change_filter":False,
-    "humidity_change_filter":False,
-    "wind_change_filter":False,
-    "onshore_wind_filter":False,
-    "dist_to_coast_filter":False,
-    "output_land_sea_temperature_diff":False,        
-    "time_filter":False,
-    "orientation_tol":45,
-    "area_thresh_pixels":12,
-    "aspect_thresh":2,
-    }
-
-#Set the fixed SBI and F thresholds. These represent the 99.5th percentile 
-thresh_F = 18.8
-
-#Do the filtering using filter_3d
-F_objects = sea_breeze_filters.filter_3d(
-    F.F,
-    threshold="fixed",
-    threshold_value=thresh_F,
-    lsm=lsm,
-    angle_ds=angle_ds,
-    save_mask=True,
-    filter_out_path=outdir,
-    skipna=False,
-    props_df_out_path=stats_output_path + f"F_{exp_season}_{exp_res}_{exp_id}.csv",
-    **kwargs).compute()
-
-
-
-
-
-
-
-
-
+if __name__ == '__main__':
+    client = Client()
+    # =====================================================================
+    # Main
+    # =====================================================================
+    print("Identification Starting ......", flush=True)
+    print("=================== Setting params ===================", flush=True)
+    stats_output_path = "/g/data/up6/cx5009/hackathon/energy2026/Data_identified_seabreeze/" # need change
+       
+    #Lat lon and height bounds (Sydney, Australia). Height bounds chosen approximately as the typical maximum extent of the PBL
+    lat_slice = slice(-35.5,-32.269001)
+    lon_slice = slice(149.1505,153.1915)
+    hgt_slice = slice(0,4500)
+    
+    # Optional
+    # exp_season = 'SY_djf' # 'SY_djf' or 'SY_jja'
+    # exp_res = 'SY_1' # 'SY_1', 'SY_5', or 'SY_11p1'
+    # exp_id = 'NO-URBAN' # 'CTRL' or 'NO-URBAN'
+    
+    exp_season = sys.argv[1]
+    exp_res    = sys.argv[2]
+    exp_id     = sys.argv[3]
+    
+    print(exp_season, exp_res, exp_id, flush=True)
+    
+    if exp_res=="SY_11p1":
+        dx_res = 0.11
+    elif exp_res=="SY_5":
+        dx_res = 0.045
+    else:
+        dx_res = 0.00899
+    
+    if exp_season == 'SY_djf':
+        change_tlocal = 11
+        #Time bounds for a single case (using 8 hours of data)
+        t1 = "2016-11-30 01:00"
+        t2 = "2017-03-01 00:00" # the last time step "2017-03-01 00:00" # need change
+    else:
+        change_tlocal = 10
+        t1 = "2017-05-31 01:00"
+        t2 = "2017-09-01 00:00" # the last time step "2017-09-01 00:00" # need change
+    
+    outdir = Path(
+        f"/g/data/up6/cx5009/hackathon/energy2026/Data_identified_seabreeze/{exp_season}_{exp_res}_{exp_id}"
+    )
+    
+    outdir.mkdir(parents=True, exist_ok=True)
+    
+    print("=================== Loading Coastline Angel ===================", flush=True)
+    #Load Coastline Angel data
+    orog, lsm = load_static(exp_season, exp_res, exp_id,lon_slice,lat_slice)
+    angle_ds = xr.open_dataset(f'/g/data/up6/cx5009/hackathon/energy2026/coast_angle_{exp_res}.nc') # need change
+    
+    print("=================== Seabreeze Diagnostics Calculation ===================", flush=True)
+    #Set chunks for loading data
+    #Note because of our strategy applying xr.DataArray.map_blocks for smoothing, we need to 
+    # have time chunks of size 1.
+    chunks = {"lev":{},"time":1,"lat":-1,"lon":-1}
+    
+    #Set smoothing option to True (gaussian smoothing filter with a sigma of 4. See scipy.ndimage.gaussian_filter)
+    smooth = True
+    sigma = 4
+    
+    #Load surface V wind
+    vas = load_variable(
+        "vwnd10m_b",
+        t1,
+        t2,
+        exp_season,
+        exp_res,
+        exp_id,
+        lon_slice,
+        lat_slice,
+        "1hr",
+        chunks=chunks,
+        staggered="lat",
+        dx=dx_res,
+        smooth=smooth,
+        sigma=sigma)
+    
+    #Load surface U wind
+    uas = load_variable(
+        "uwnd10m_b",
+        t1,
+        t2,
+        exp_season,
+        exp_res,
+        exp_id,
+        lon_slice,
+        lat_slice,
+        "1hr",
+        chunks=chunks,
+        staggered="lon",
+        dx=dx_res,
+        smooth=smooth,
+        sigma=sigma)
+    
+    #Load surface specific humidity
+    hus = load_variable(
+        "qsair_scrn",
+        t1,
+        t2,
+        exp_season,
+        exp_res,
+        exp_id,
+        lon_slice,
+        lat_slice,
+        "1hr",
+        chunks=chunks,
+        smooth=smooth,
+        sigma=sigma)
+    
+    #Moisture frontogenesis
+    F = sea_breeze_funcs.kinematic_frontogenesis(
+        hus,
+        uas,
+        vas
+    )
+    
+    # Time change to local time
+    F["time"] = F.time + np.timedelta64(change_tlocal, "h")
+    
+    print("=================== Object Filter ===================", flush=True)
+    #Set up filtering options. Here just use the orientation, aspect ratio and area filters
+    kwargs = {
+        "orientation_filter":True,
+        "aspect_filter":True,
+        "area_filter":True,        
+        "land_sea_temperature_filter":False,                    
+        "temperature_change_filter":False,
+        "humidity_change_filter":False,
+        "wind_change_filter":False,
+        "onshore_wind_filter":False,
+        "dist_to_coast_filter":False,
+        "output_land_sea_temperature_diff":False,        
+        "time_filter":False,
+        "orientation_tol":45,
+        "area_thresh_pixels":12,
+        "aspect_thresh":2,
+        }
+    
+    #Set the fixed SBI and F thresholds. These represent the 99.5th percentile 
+    thresh_F = 18.8
+    
+    #Do the filtering using filter_3d
+    F_objects = sea_breeze_filters.filter_3d(
+        F.F,
+        threshold="fixed",
+        threshold_value=thresh_F,
+        lsm=lsm,
+        angle_ds=angle_ds,
+        save_mask=True,
+        filter_out_path=outdir,
+        skipna=False,
+        props_df_out_path=stats_output_path + f"F_{exp_season}_{exp_res}_{exp_id}.csv",
+        **kwargs).compute()
+    
+    
+    
+    
+    
+    
+    
+    
+    
