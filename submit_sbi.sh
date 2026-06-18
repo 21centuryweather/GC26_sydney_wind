@@ -1,10 +1,11 @@
 #!/bin/bash
+
 #PBS -q normal
 #PBS -P nf33
-#PBS -l ncpus=1
-#PBS -l mem=100GB
+#PBS -l ncpus=48
+#PBS -l mem=190GB
 #PBS -l jobfs=1GB
-#PBS -l walltime=08:00:00
+#PBS -l walltime=12:00:00
 #PBS -l storage=scratch/up6+gdata/up6+gdata/xp65+gdata/nf33+gdata/gb02
 #PBS -l wd
 #PBS -o /scratch/up6/cx5009/PBS_output/
@@ -19,10 +20,15 @@ module purge
 module use /g/data/xp65/public/modules
 module load conda/analysis3
 
-python3 seabreeze_identification.py \
+echo "START $(date)"
+echo "$EXP_SEASON $EXP_RES $EXP_ID"
+
+python3 -u seabreeze_identification_v2.py \
     ${EXP_SEASON} \
     ${EXP_RES} \
     ${EXP_ID}
+
+echo "END $(date)"
 
 
 
