@@ -535,15 +535,15 @@ tas = load_variable(
     smooth=smooth,
     sigma=sigma)
 
-#Sea breeze index
-wind = xr.Dataset({"u":ua,"v":va})
+# #Sea breeze index
+# wind = xr.Dataset({"u":ua,"v":va})
 
-sbi = sea_breeze_funcs.calc_sbi(wind,
-                                angle_ds.angle_interp,
-                                subtract_mean=False,
-                                height_method="blh",
-                                blh_da=zmla,
-                                vert_coord="lev")
+# sbi = sea_breeze_funcs.calc_sbi(wind,
+#                                 angle_ds.angle_interp,
+#                                 subtract_mean=False,
+#                                 height_method="blh",
+#                                 blh_da=zmla,
+#                                 vert_coord="lev")
 
 #Moisture frontogenesis
 F = sea_breeze_funcs.kinematic_frontogenesis(
@@ -552,26 +552,26 @@ F = sea_breeze_funcs.kinematic_frontogenesis(
     vas
 ) 
 
-#Fuzzy logic algorithm
-#Compute the hourly rate of change in temperature, wind, and moisture. 
-hourly_change = sea_breeze_funcs.hourly_change(
-    hus,
-    tas,
-    uas,
-    vas,
-    angle_ds.angle_interp
-)
+# #Fuzzy logic algorithm
+# #Compute the hourly rate of change in temperature, wind, and moisture. 
+# hourly_change = sea_breeze_funcs.hourly_change(
+#     hus,
+#     tas,
+#     uas,
+#     vas,
+#     angle_ds.angle_interp
+# )
 
-#Combine into "fuzzy function"
-F_fuzzy = field = sea_breeze_funcs.fuzzy_function_combine(
-    hourly_change.wind_change,
-    hourly_change.q_change,
-    hourly_change.t_change, combine_method="mean")
+# #Combine into "fuzzy function"
+# F_fuzzy = field = sea_breeze_funcs.fuzzy_function_combine(
+#     hourly_change.wind_change,
+#     hourly_change.q_change,
+#     hourly_change.t_change, combine_method="mean")
 
 # Time change to local time
-sbi["time"] = sbi.time + np.timedelta64(change_tlocal, "h")
+# sbi["time"] = sbi.time + np.timedelta64(change_tlocal, "h")
 F["time"] = F.time + np.timedelta64(change_tlocal, "h")
-F_fuzzy["time"] = F_fuzzy.time + np.timedelta64(change_tlocal, "h")
+# F_fuzzy["time"] = F_fuzzy.time + np.timedelta64(change_tlocal, "h")
 
 print("=================== Object Filter ===================", flush=True)
 #Set up filtering options. Here just use the orientation, aspect ratio and area filters
@@ -594,9 +594,9 @@ kwargs = {
 
 #Set the fixed SBI and F thresholds. These represent the 99.5th percentile 
 # from AUS2200 data over a 6-month period 
-thresh_sbi = 0.41
+# thresh_sbi = 0.41
 thresh_F = 18.8
-thresh_fuzzy = 0.20
+# thresh_fuzzy = 0.20
 
 #Do the filtering using filter_3d
 F_objects = sea_breeze_filters.filter_3d(
@@ -605,35 +605,35 @@ F_objects = sea_breeze_filters.filter_3d(
     threshold_value=thresh_F,
     lsm=lsm,
     angle_ds=angle_ds,
-    save_mask=False,
-    filter_out_path=None,
+    save_mask=True,
+    filter_out_path=True,
     skipna=False,
     props_df_out_path=stats_output_path + f"F_{exp_season}_{exp_res}_{exp_id}.csv",
     **kwargs).compute()
 
-sbi_objects = sea_breeze_filters.filter_3d(
-    sbi.sbi,
-    threshold="fixed",
-    threshold_value=thresh_sbi,
-    lsm=lsm,
-    angle_ds=angle_ds,
-    save_mask=False,
-    filter_out_path=None,
-    skipna=False,
-    props_df_out_path=stats_output_path + f"sbi_{exp_season}_{exp_res}_{exp_id}.csv",
-    **kwargs).compute()
+# sbi_objects = sea_breeze_filters.filter_3d(
+#     sbi.sbi,
+#     threshold="fixed",
+#     threshold_value=thresh_sbi,
+#     lsm=lsm,
+#     angle_ds=angle_ds,
+#     save_mask=True,
+#     filter_out_path=None,
+#     skipna=False,
+#     props_df_out_path=stats_output_path + f"sbi_{exp_season}_{exp_res}_{exp_id}.csv",
+#     **kwargs).compute()
 
-fuzzy_objects = sea_breeze_filters.filter_3d(
-    F_fuzzy,
-    threshold="fixed",
-    threshold_value=thresh_fuzzy,
-    lsm=lsm,
-    angle_ds=angle_ds,
-    save_mask=False,
-    filter_out_path=None,
-    skipna=False,
-    props_df_out_path=stats_output_path + f"fuzzy_{exp_season}_{exp_res}_{exp_id}.csv",
-    **kwargs).compute()
+# fuzzy_objects = sea_breeze_filters.filter_3d(
+#     F_fuzzy,
+#     threshold="fixed",
+#     threshold_value=thresh_fuzzy,
+#     lsm=lsm,
+#     angle_ds=angle_ds,
+#     save_mask=True,
+#     filter_out_path=None,
+#     skipna=False,
+#     props_df_out_path=stats_output_path + f"fuzzy_{exp_season}_{exp_res}_{exp_id}.csv",
+#     **kwargs).compute()
 
 
 
